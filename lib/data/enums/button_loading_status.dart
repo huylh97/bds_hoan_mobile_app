@@ -1,0 +1,1 @@
+enum ButtonLoadingStatus { init, loading }

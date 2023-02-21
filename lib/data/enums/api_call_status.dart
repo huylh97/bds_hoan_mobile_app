@@ -1,0 +1,1 @@
+enum ApiCallStatus { init, loading }

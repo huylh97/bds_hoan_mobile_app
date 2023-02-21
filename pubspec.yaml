@@ -1,0 +1,86 @@
+name: bds_hoan_mobile
+description: BeeLand App
+version: 1.0.1+1
+environment:
+  sdk: ">=2.12.0 <3.0.0"
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  cupertino_icons: ^1.0.4
+
+  # Storage
+  shared_preferences: ^2.0.7
+  # Locale
+  intl: ^0.17.0
+  # Bloc
+  bloc: ^8.0.3
+  flutter_bloc: ^8.0.1
+  # Network
+  dio: ^4.0.4
+  # Media
+  flutter_svg: ^1.0.3
+  # UI
+  auto_size_text: ^3.0.0
+  shimmer: ^2.0.0 
+  # Util
+  equatable: ^2.0.3
+  fluttertoast: ^8.0.9
+  pull_to_refresh: ^2.0.0
+  flutter_spinkit: ^5.1.0
+  logger: ^1.1.0
+  flutter_screenutil: ^5.5.4
+  url_launcher: ^6.1.5
+  json_serializable: ^6.4.0
+  json_annotation: ^4.7.0
+  image_picker: ^0.8.6
+  # Maps
+  google_maps_flutter: ^2.2.0
+  geolocator: ^9.0.2
+
+  dropdown_search: ^5.0.3
+  cached_network_image: ^3.2.2
+  modal_bottom_sheet: ^2.1.2
+  carousel_slider: ^4.1.1
+  readmore: ^2.2.0
+  photo_view: ^0.14.0
+  animations: ^2.0.4
+  share_plus: ^6.2.0
+  path_provider: ^2.0.11
+  badges: ^2.0.3
+  flutter_app_badger: ^1.5.0
+  share_extend: ^2.0.0
+  flutter_inappwebview: ^6.0.0-beta.12
+
+
+flutter:
+  assets:
+    - assets/icons/
+    - assets/images/
+  fonts:
+    - family: OpenSans
+      fonts:
+        - asset: assets/fonts/OpenSans-Bold.ttf
+        - asset: assets/fonts/OpenSans-BoldItalic.ttf
+        - asset: assets/fonts/OpenSans-ExtraBold.ttf
+        - asset: assets/fonts/OpenSans-ExtraBoldItalic.ttf
+        - asset: assets/fonts/OpenSans-Italic.ttf
+        - asset: assets/fonts/OpenSans-Light.ttf
+        - asset: assets/fonts/OpenSans-LightItalic.ttf
+        - asset: assets/fonts/OpenSans-Regular.ttf
+        - asset: assets/fonts/OpenSans-SemiBold.ttf
+        - asset: assets/fonts/OpenSans-SemiBoldItalic.ttf
+  uses-material-design: true
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^1.0.4
+  flutter_launcher_icons: "^0.9.2"
+  build_runner: ^2.2.1
+
+flutter_icons:
+  android: true
+  ios: true
+  image_path: "assets/icons/app_icon.png"
