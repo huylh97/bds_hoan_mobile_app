@@ -1,17 +1,13 @@
 import 'package:bds_hoan_mobile/bloc_global/app_bloc.dart';
 import 'package:bds_hoan_mobile/configs/_config.dart';
 import 'package:bds_hoan_mobile/data/enums/api_call_status.dart';
-import 'package:bds_hoan_mobile/data/enums/status.dart';
 import 'package:bds_hoan_mobile/data/models/real_estate/real_estate_data_model.dart';
 import 'package:bds_hoan_mobile/data/models/real_estate/real_estate_filter_model.dart';
 import 'package:bds_hoan_mobile/data/models/real_estate/real_estate_register_param.dart';
-import 'package:bds_hoan_mobile/presentation/screens/real_estate_register/deposit_type_list.dart';
 import 'package:bds_hoan_mobile/presentation/screens/real_estate_search/cubit/real_estate_search_state.dart';
 import 'package:bds_hoan_mobile/presentation/screens/real_estate_search/view/widgets/add_product_modal.dart';
 import 'package:bds_hoan_mobile/presentation/screens/real_estate_search/view/widgets/tool_button.dart';
 import 'package:bds_hoan_mobile/presentation/screens/real_estate_search/view/widgets/widget_real_estate_map_view.dart';
-import 'package:bds_hoan_mobile/presentation/shared_widgets/buttons/app_elevated_button.dart';
-import 'package:bds_hoan_mobile/presentation/shared_widgets/common/widget.dart';
 import 'package:bds_hoan_mobile/presentation/shared_widgets/utils/_utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -24,6 +20,7 @@ import '../cubit/real_estate_search_cubit.dart';
 import 'widgets/add_product_intro.dart';
 import 'widgets/tool_bar.dart';
 import 'widgets/widget_real_estate_list_view.dart';
+import 'widgets/main_app_bar.dart';
 
 class RealEstateSearchView extends StatefulWidget {
   const RealEstateSearchView({
@@ -76,10 +73,10 @@ class _RealEstateSearchViewState extends State<RealEstateSearchView> {
     allMarkers.removeWhere((element) => element.mapsId.value == 'AddNew');
 
     final marker = Marker(
-        markerId: MarkerId('AddNew'),
-        // icon: icon,
-        icon: iconAddNewPin!,
-        position: LatLng(pos.latitude, pos.longitude));
+      markerId: MarkerId('AddNew'),
+      icon: iconAddNewPin!,
+      position: LatLng(pos.latitude, pos.longitude),
+    );
 
     allMarkers.add(marker);
     setState(() {
@@ -122,161 +119,87 @@ class _RealEstateSearchViewState extends State<RealEstateSearchView> {
         },
         child: Scaffold(
           backgroundColor: AppColors.scaffoldBgColor,
-          appBar: _buildAppBar(context),
+          appBar: buildAppBar(
+            context,
+            () {
+              setState(() {
+                allMarkers = [];
+                zoomStatus = 0;
+              });
+
+              cubit.getListRealEstate();
+            },
+          ),
           body: BlocBuilder<RealEstateSearchCubit, RealEstateSearchState>(builder: (context, state) {
             if (state.apiCallStatus == ApiCallStatus.loading) {
               return const Center(
                 child: CircularProgressIndicator(),
               );
             }
-
-            return Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+            if (displayMap) {
+              return Stack(
                 children: [
-                  // const SizedBox(height: 10),
-                  const Padding(padding: EdgeInsets.symmetric(horizontal: 40), child: DefaultDivider()),
-                  const SizedBox(height: 5),
-                  Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: AppDimension.kScaffoldHorPadding),
-                      child: ToolBar(
-                        mapSelected: displayMap,
-                        numProduct: state.displayDataList != null ? state.displayDataList!.length : 0,
-                        voidCallbackFilter: () {
-                          Navigator.pushNamed(context, Routes.searchFilters, arguments: state.filterData).then((value) {
-                            RealEstateFilterModel filterData = value as RealEstateFilterModel;
-                            setState(() {
-                              allMarkers = [];
-                            });
-
-                            cubit.filter(filterData: filterData);
-                          });
-                        },
-                        voidCallbackListMode: () {
-                          setState(() {
-                            displayMap = false;
-                          });
-                        },
-                        voidCallbackMapMode: () {
-                          setState(() {
-                            displayMap = true;
-                          });
-                        },
-                        voidCallbackNotApprovedList: () {
-                          setState(() {
-                            allMarkers = [];
-                          });
-                          cubit.filterNotApprovedDataOnly(enableLoading: true);
-                        },
-                        voidCallbackHiddenList: () {
-                          setState(() {
-                            allMarkers = [];
-                          });
-                          cubit.filterHiddenDataOnly(enableLoading: true);
-                        },
-                        notAprrovedOnly: state.notAprrovedOnly ?? false,
-                        hiddenOnly: state.hiddenOnly ?? false,
-                      )),
-                  const SizedBox(height: 10),
-                  displayMap
-                      ? Expanded(child: _buildGoogleMapDisplay(context, state.displayDataList))
-                      : ((state.displayDataList == null || state.displayDataList!.length == 0)
-                          ? const Padding(padding: EdgeInsets.only(left: 12, right: 12), child: AddProductIntro())
-                          : Expanded(
-                              child: ListView.builder(
-                                itemCount: state.displayDataList!.length,
-                                padding: const EdgeInsets.only(top: 8),
-                                scrollDirection: Axis.vertical,
-                                itemBuilder: (BuildContext context, int index) {
-                                  return WidgetRealEstateListView(
-                                    callback: () {
-                                      Navigator.pushNamed(context, Routes.realEstateViewInfo, arguments: state.displayDataList![index].id)
-                                          .then((value) {
-                                        setState(() {
-                                          allMarkers = [];
-                                          zoomStatus = 0;
-                                        });
-                                        cubit.getListRealEstate();
-                                      });
-                                    },
-                                    productData: state.displayDataList![index],
-                                  );
-                                },
-                              ),
-                            ))
+                  _buildGoogleMapDisplay(context, state.displayDataList),
+                  _buildTopToolBar(state, context),
                 ],
-              ),
+              );
+            }
+            return Column(
+              children: [
+                _buildTopToolBar(state, context),
+                state.displayDataList == null
+                    ? const Padding(padding: EdgeInsets.only(left: 12, right: 12), child: AddProductIntro())
+                    : Expanded(
+                        child: ListView.builder(
+                          itemCount: state.displayDataList!.length,
+                          padding: const EdgeInsets.only(top: 8),
+                          scrollDirection: Axis.vertical,
+                          itemBuilder: (BuildContext context, int index) {
+                            return WidgetRealEstateListView(
+                              callback: () {
+                                Navigator.pushNamed(context, Routes.realEstateViewInfo, arguments: state.displayDataList![index].id).then((value) {
+                                  setState(() {
+                                    allMarkers = [];
+                                    zoomStatus = 0;
+                                  });
+                                  cubit.getListRealEstate();
+                                });
+                              },
+                              productData: state.displayDataList![index],
+                            );
+                          },
+                        ),
+                      ),
+              ],
             );
           }),
         ));
   }
 
-  AppBar _buildAppBar(BuildContext context) {
-    return AppBar(
-      centerTitle: false,
-      elevation: 0,
-      leadingWidth: 0,
-      leading: const SizedBox(),
-      title: Row(
-        mainAxisAlignment: MainAxisAlignment.start,
-        mainAxisSize: MainAxisSize.max,
-        children: [
-          InkWell(
-            splashColor: Colors.white,
-            highlightColor: Colors.white,
-            onTap: () {
-              if (AppBloc.authenticationCubit.isSuperAdmin == true) {
-                AppBloc.appContainerSuperAdminCubit.state.scaffoldKey.currentState?.openDrawer();
-              } else {
-                if (AppBloc.authenticationCubit.isAdminLogin == true) {
-                  AppBloc.appContainerAdminCubit.state.scaffoldKey.currentState?.openDrawer();
-                } else {
-                  AppBloc.appContainerMemberCubit.state.scaffoldKey.currentState?.openDrawer();
-                }
-              }
-            },
-            child: Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                border: Border.all(color: AppColors.boxBorder),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: const Icon(Icons.menu, color: Color(0xFF374957)),
-            ),
-          ),
-          const Expanded(child: SizedBox()),
-          Text(
-            'Quản lý BDS',
-            style: AppBloc.applicationCubit.appTextStyle.mediumBold,
-          ),
-          const Expanded(child: SizedBox()),
-          AppBloc.authenticationCubit.isSuperAdmin == true
-              ? SizedBox(
-                  width: 8,
-                )
-              : InkWell(
-                  onTap: () {
-                    Navigator.pushNamed(context, Routes.realEstateRegister,
-                            arguments: RealEstateRegEditParam(processMode: RealEstateProcessMode.register, inputType: RealEstateInputType.vn2000))
-                        .then((value) {
-                      setState(() {
-                        allMarkers = [];
-                        zoomStatus = 0;
-                      });
+  Widget _buildTopToolBar(RealEstateSearchState state, BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppDimension.kScaffoldHorPadding,
+        vertical: 10,
+      ),
+      child: ToolBar(
+        initalDisplayMap: displayMap,
+        onSwitchViewMode: (bool value) {
+          setState(() {
+            displayMap = value;
+          });
+        },
+        numProduct: state.displayDataList != null ? state.displayDataList!.length : 0,
+        voidCallbackFilter: () {
+          Navigator.pushNamed(context, Routes.searchFilters, arguments: state.filterData).then((value) {
+            RealEstateFilterModel filterData = value as RealEstateFilterModel;
+            setState(() {
+              allMarkers = [];
+            });
 
-                      cubit.getListRealEstate();
-                    });
-                  },
-                  child: Text(
-                    'VN2000',
-                    style: AppBloc.applicationCubit.appTextStyle.normalBold.copyWith(
-                      color: AppColors.primary,
-                      decoration: TextDecoration.underline,
-                    ),
-                  ),
-                )
-        ],
+            cubit.filter(filterData: filterData);
+          });
+        },
       ),
     );
   }

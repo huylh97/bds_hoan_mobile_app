@@ -15,7 +15,7 @@ class WidgetRealEstateMapView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(mainAxisSize: MainAxisSize.min, mainAxisAlignment: MainAxisAlignment.start, children: <Widget>[
       Padding(
-          padding: EdgeInsets.only(bottom: 80, left: 35, right: 35),
+          padding: const EdgeInsets.only(bottom: 80, left: 35, right: 35),
           child: InkWell(
             splashColor: Colors.white,
             onTap: callback,

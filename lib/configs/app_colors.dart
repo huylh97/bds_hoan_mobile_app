@@ -5,6 +5,7 @@ class AppColors {
   // static const Color primary = Color(0xFF9C8DEB);
   static const Color primary = Color(0xFFFFA300);
   static const Color secondary = Color(0xFFFFA300);
+  static const Color appBarColor = Color(0xFFFF9F43);
   static const Color third = Color(0xFF1F4761);
   static const Color scaffoldBgColor = Color(0xFFF8F9FD);
   static const Color kTextColor = Color.fromARGB(255, 29, 31, 33);
